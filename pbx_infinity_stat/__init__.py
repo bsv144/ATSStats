@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import render_template
 from flask_bootstrap import Bootstrap
+import json
 import os
 
 
@@ -11,7 +12,8 @@ def create_app(test_config=None):
         DATABASE_HOST='localhost',
     )
 	Bootstrap(app)
-	app.config['BOOTSTRAP_SERVE_LOCAL'] = True
+	app.config['BOOTSTRAP_SERVE_LOCAL']  = True
+	app.config['BOOTSTRAP_USE_MINIFIED'] = True
 
 	if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -30,6 +32,12 @@ def create_app(test_config=None):
 	def index():
 		return render_template('/index.html')
 	
+	@app.route('/get_data', methods=['POST'])
+	def getdata():
+		with open('test.json', 'r') as f:
+			callgroups_dict = json.load(f)
+		return callgroups_dict
+
 	return app
 
 	'''

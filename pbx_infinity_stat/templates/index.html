@@ -1,12 +1,65 @@
 {% extends "bootstrap/base.html" %}
-{% block title %}This is an example page{% endblock %}
+{% block title %}Страница статистики АТС Infinity{% endblock %}
 
-{% block navbar %}
-<div class="navbar navbar-fixed-top">
-  <!-- ... -->
-</div>
-{% endblock %}
+ 
+{% block body %}
+  <div class="container-fluid">
+    <h1>Страница статистики АТС Infinity</h1>
+  </div>
 
-{% block content %}
-  <h1>Hello, Bootstrap</h1>
+  <div class="container">
+    <h2><B>Группы</B></h2>
+    <div id="divGroups"  >
+     
+    </div>
+  </div>
+
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    function addCallGroups( data ) {
+      console.log( data );
+      console.log( data.groupname );
+      var j = 0;
+      var html = '';
+      var html = `<table class="table border">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col" colspan="5">${data.groupname}</th>
+          </tr>
+          <tr>
+          <th class="border" scope="col">#</th>
+          <th class="border" scope="col">Фамилия</th>
+          <th class="border" scope="col">Имя</th>
+          <th class="border" scope="col">Отчество</th>
+          <th class="border" scope="col">Логин</th>
+          </tr>
+        </thead>`;
+      $.each( data.members, function(i, member ) {
+        console.log( member );
+        j++;
+        html += `<tr>
+          <th scope="row"> ${j} </td>
+          <td> ${member.firstname} </td>
+          <td> ${member.moddlename} </td>
+          <td> ${member.lastname} </td>
+          <td> ${member.login} </td>
+        </tr>`;
+      });
+      html += '</table>';
+      $("#divGroups").append(html);
+    };
+
+    $.post("/get_data", function( data ){
+        console.log( data );
+        //Обрабатываем группы
+        $("#divGroups").empty();
+        $.each( data.CallGroups, function(i, group){
+          addCallGroups( group );
+        });
+        console.log( typeof data );
+      }, "json");
+  </script>
 {% endblock %}

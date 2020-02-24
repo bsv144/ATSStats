@@ -1,0 +1,51 @@
+{
+    "CallGroups": [
+        {
+            "groupname": "61-05-25",
+            "mambers": [
+                {
+                    "firstname": "f1",
+                    "moddlename": "m1",
+                    "lastname": "l1",
+                    "login": "log1"
+                },
+                {
+                    "firstname": "f2",
+                    "moddlename": "m2",
+                    "lastname": "l2",
+                    "login": "log2"
+                },
+                {
+                    "firstname": "f3",
+                    "moddlename": "m3",
+                    "lastname": "l3",
+                    "login": "log3"
+                }
+            ]
+        },
+        {
+            "groupname": "61-05-25",
+            "mambers": [
+                {
+                    "firstname": "f1",
+                    "moddlename": "m1",
+                    "lastname": "l1",
+                    "login": "log1"
+                },
+                {
+                    "firstname": "f4",
+                    "moddlename": "m4",
+                    "lastname": "l4",
+                    "login": "log4"
+                },
+                {
+                    "firstname": "f5",
+                    "moddlename": "m5",
+                    "lastname": "l5",
+                    "login": "log5"
+                }
+            ]
+
+        }
+    ]
+}

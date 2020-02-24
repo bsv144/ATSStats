@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+  </head>
+  <body>
+	<div class="container-fluid">
+		<h1>Страница статистики АТС Infinity</h1>
+	</div>
+	<div class="container">
+		<h2><B>Группы</B></h2>
+		<div id="divGroups" class="bg-primary text-white" >
+			<table class="table border">
+				<thead class="thead-light">
+					<tr>
+						<th scope="col" colspan="4">Приём показаний (61-05-25)</th>
+					</tr>
+					<tr>
+					  <th class="border" scope="col">#</th>
+					  <th class="border" scope="col">First</th>
+					  <th class="border" scope="col">Last</th>
+					  <th class="border" scope="col">Handle</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+					  <th scope="row">1</th>
+					  <td>Mark</td>
+					  <td>Otto</td>
+					  <td>@mdo</td>
+					</tr>
+					<tr>
+					  <th scope="row">2</th>
+					  <td>Jacob</td>
+					  <td>Thornton</td>
+					  <td>@fat</td>
+					</tr>
+					<tr>
+					  <th scope="row">3</th>
+					  <td>Larry</td>
+					  <td>the Bird</td>
+					  <td>@twitter</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<script type="text/javascript">
+		function addStuff() {
+			var words = ['one', 'two', 'three'];
+			var GroupName = ['Приём показаний (61-05-25)', 'КоллЦентр (61-02-05)'];
+			$.each(GroupName, function(i, GroupName){
+					var j = 0;
+					var html = '';
+					var html = `<table class="table border">
+						<thead class="thead-light">
+							<tr>
+								<th scope="col" colspan="5">${GroupName}</th>
+							</tr>
+							<tr>
+							<th class="border" scope="col">#</th>
+							<th class="border" scope="col">Фамилия</th>
+							<th class="border" scope="col">Имя</th>
+							<th class="border" scope="col">Отчество</th>
+							<th class="border" scope="col">Логин</th>
+							</tr>
+						</thead>`;
+					$.each(words, function(i, word) {
+							j++;
+							html += `<tr>
+								<th scope="row"> ${j} </td>
+								<td> ${word} </td>
+								<td> ${word} </td>
+								<td> ${word} </td>
+								<td> ${word} </td>
+							</tr>`;
+						}
+					);
+				html += '</table>';
+				$("#divGroups").append(html);
+				}
+			);
+		};
+		$.post("/getdata", function( data ){
+				console.log( data );
+			});
+	</script>
+  </body>
+</html>
