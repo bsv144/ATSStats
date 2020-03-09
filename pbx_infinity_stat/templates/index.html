@@ -4,15 +4,26 @@
  
 {% block body %}
   <div class="container-fluid">
-    <h1>Страница статистики АТС Infinity</h1>
+    <div class="row">
+      <div class="col-md-12">
+        <h1>Страница статистики АТС Infinity</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3 container">
+        <h2><B>Группы</B></h2>
+        <div id="divGroups"  >
+         
+        </div>
+      </div>
+      <div class="col-md-3"></div>
+      <div class="col-md-3"></div>
+      <div class="col-md-3"></div>
+    </div>
+    <div class="row"></div>
   </div>
 
-  <div class="container">
-    <h2><B>Группы</B></h2>
-    <div id="divGroups"  >
-     
-    </div>
-  </div>
+  
 
 
   <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
@@ -20,8 +31,6 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <script type="text/javascript">
     function addCallGroups( data ) {
-      console.log( data );
-      console.log( data.groupname );
       var j = 0;
       var html = '';
       var html = `<table class="table border">
@@ -37,15 +46,17 @@
           <th class="border" scope="col">Логин</th>
           </tr>
         </thead>`;
-      $.each( data.members, function(i, member ) {
-        console.log( member );
+        //console.log( data );
+        //console.log( data.groupname );
+        $.each( JSON.parse(data.members), function(i, member ) {
+        console.log( member.Login );
         j++;
         html += `<tr>
           <th scope="row"> ${j} </td>
-          <td> ${member.firstname} </td>
-          <td> ${member.moddlename} </td>
-          <td> ${member.lastname} </td>
-          <td> ${member.login} </td>
+          <td> ${member.Name_F} </td>
+          <td> ${member.Name_I} </td>
+          <td> ${member.Name_O} </td>
+          <td> ${member.Login} </td>
         </tr>`;
       });
       html += '</table>';
@@ -53,7 +64,7 @@
     };
 
     $.post("/get_data", function( data ){
-        console.log( data );
+        //console.log( data );
         //Обрабатываем группы
         $("#divGroups").empty();
         $.each( data.CallGroups, function(i, group){

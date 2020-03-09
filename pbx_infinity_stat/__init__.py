@@ -1,8 +1,10 @@
 from flask import Flask
 from flask import render_template
 from flask_bootstrap import Bootstrap
+#from flask_sqlalchemy import SQLAlchemy
 import json
 import os
+from . import db
 
 
 def create_app(test_config=None):
@@ -11,9 +13,6 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
         DATABASE_HOST='localhost',
     )
-	Bootstrap(app)
-	app.config['BOOTSTRAP_SERVE_LOCAL']  = True
-	app.config['BOOTSTRAP_USE_MINIFIED'] = True
 
 	if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -27,6 +26,9 @@ def create_app(test_config=None):
 		os.makedirs(app.instance_path)
 	except OSError:
 		pass
+
+	#db = SQLAlchemy(app)
+	Bootstrap(app)
 	
 	@app.route('/')
 	def index():
@@ -34,9 +36,10 @@ def create_app(test_config=None):
 	
 	@app.route('/get_data', methods=['POST'])
 	def getdata():
-		with open('test.json', 'r') as f:
-			callgroups_dict = json.load(f)
-		return callgroups_dict
+		# with open('test.json', 'r') as f:
+		# 	callgroups_dict = json.load(f)
+		# return callgroups_dict
+		return  db.get_ACDQueuesMembers()
 
 	return app
 
