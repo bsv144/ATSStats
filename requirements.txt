@@ -1,0 +1,5 @@
+Flask-Bootstarp4
+numpy
+pandas
+psycopg2
+python-dotenv

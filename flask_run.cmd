@@ -1,3 +1,3 @@
-set FLASK_APP=pbx_infinity_stat
+set FLASK_APP=app.app
 set FLASK_ENV=development
 flask run
