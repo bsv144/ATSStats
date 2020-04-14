@@ -18,6 +18,7 @@ DBNAME   = os.environ.get('DBNAME')
 USER     = os.environ.get('USER')
 PASSWORD = os.environ.get('PASSWORD')
 
+
 def get_ACDQueuesMembers():
 	con_Configuration = psycopg2.connect( dbname= DBNAME, user= USER, password= PASSWORD, host= HOST, port= PORT)
 	con_Security = psycopg2.connect( dbname= 'Cx_Security', user= USER, password= PASSWORD, host= HOST, port= PORT)
@@ -48,11 +49,11 @@ def get_ACDQueuesMembers():
 		'''
 		select qm."IDACDQueue", qm."IDMember",
 		case
-			when qm."IDACDQueue" = 5000049053 then 'Колл-Центр (61-05-25)'
+			when qm."IDACDQueue" in (5000049053,5014640991) then 'Колл-Центр (61-05-25)'
 			when qm."IDACDQueue" = 5014846675 then 'Приём показаний (61-02-05)'
 		end as "Name"
 		from public."C_ACDQueuesMembers" as qm
-		where qm."IDACDQueue" in (5000049053,5014846675)
+		where qm."IDACDQueue" in (5000049053,5014846675,5014640991)
 		'''
 	, con_Configuration)
 	con_Configuration.close()
