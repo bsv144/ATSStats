@@ -33,3 +33,7 @@ def getdata():
 		# 	callgroups_dict = json.load(f)
 		# return callgroups_dict
 	return  db.get_ACDQueuesMembers()
+
+@app.route('/get_stats', methods=['POST'])
+def getstats():
+	return db.get_StatisticsByCall()

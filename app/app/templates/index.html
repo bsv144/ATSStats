@@ -10,17 +10,37 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-3 container">
+      <div class="col-md-2 container">
         <h2><B>Группы</B></h2>
-        <div id="divGroups"  >
+        <div id="divGroups">
          
         </div>
       </div>
-      <div class="col-md-3"></div>
-      <div class="col-md-3"></div>
-      <div class="col-md-3"></div>
+      <div class="col-md-2"></div>
+      <div class="col-md-4"></div>
+      <div class="col-md-4"></div>
     </div>
-    <div class="row"></div>
+    <!-- End row -->
+    <!-- Row for stat-->
+    <div class="row">
+      <div class="col-md-12" >
+        <h2><B>Очередь</B></h2>
+          <div id="divQueues">
+       
+          </div>
+      </div>
+  </div>
+  <!-- End row -->
+    <!-- Row for stat-->
+    <div class="row">
+        <div class="col-md-12" >
+          <h2><B>Статистика</B></h2>
+            <div id="divStats">
+         
+            </div>
+        </div>
+    </div>
+    <!-- End row -->
   </div>
 
   
@@ -30,10 +50,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <script type="text/javascript">
-    function addCallGroups( data ) {
+    function addCallGroups( data ) 
+    {
       var j = 0;
       var html = '';
-      var html = `<table class="table border">
+      var html = `<table class="table border table-sm">
         <thead class="thead-light">
           <tr>
             <th scope="col" colspan="5">${data.groupname}</th>
@@ -49,7 +70,7 @@
         //console.log( data );
         //console.log( data.groupname );
         $.each( JSON.parse(data.members), function(i, member ) {
-        console.log( member.Login );
+        //console.log( member.Login );
         j++;
         html += `<tr>
           <th scope="row"> ${j} </td>
@@ -63,14 +84,75 @@
       $("#divGroups").append(html);
     };
 
-    $.post("/get_data", function( data ){
-        //console.log( data );
+    function addStatistics( groupsCount, data ) 
+    {
+      var j = 0;
+      var html = '';
+      var html = `<table id="tStats" class="table border table-sm">
+        <thead class="thead-light">
+          <tr>
+          <th scope="col" rowspan="2"></th>
+          <th class="border" scope="col" colspan="${groupsCount}">Группа</th>
+          </tr>
+          <tr>`;
+      $.each( data, function(i,v) {    
+        html += `<th class="border" scope="col">${v.ANumberDialed}</th>`;
+      });
+      html += `</tr> </thead>`;
+      html += '</table>';
+      //console.log( html );
+      $("#divStats").append(html);
+      //console.log( data );
+        //console.log( data.StatsGroups );
+        //j++;
+      var tableRef = document.getElementById("tStats");
+      
+      //console.log( data[0]);
+      //console.log( typeof data[0]);
+      //console.log( Object.keys(data[0]).length);
+      var aKeys = Object.keys(data[0]);
+      for(var k= 1; k < aKeys.length; k++)
+      {
+        var newRow = tableRef.insertRow(k+1);
+        var newCell = newRow.insertCell(0);
+        var key = aKeys[k];
+        var newText = document.createTextNode(key);
+        newCell.appendChild(newText);
+        for(var j = 0; j < groupsCount; j++)
+        {
+          var newCell = newRow.insertCell(j+1);
+          console.log( data[j]);
+          console.log( key);
+          var newText = document.createTextNode(data[j][key]);
+          newCell.appendChild(newText);
+        };
+      };
+    };
+
+    function getAJAXdata(){
+      $.post("/get_data", function( data ){
+          //Обрабатываем группы
+          $("#divGroups").empty();
+          $.each( data.CallGroups, function(i, group){
+            addCallGroups( group );
+          });
+          //console.log( typeof data );
+        }, "json");
+        
+      $.post("/get_stats", function( data ){
+        //console.log( typeof data);
+        //console.log( JSON.parse(data));
+        data = JSON.parse(data)
+        groupsCount = data.length;
         //Обрабатываем группы
-        $("#divGroups").empty();
-        $.each( data.CallGroups, function(i, group){
-          addCallGroups( group );
-        });
-        console.log( typeof data );
+        $("#divStats").empty();
+        addStatistics( groupsCount, data );
+        //$.each( data.StatsGroups, function(i, groupsCount, group){
+        //  addStatistics( group );
+        //});
       }, "json");
+    }
+    getAJAXdata()
+    setTimeout(getAJAXdata(), 30000)
   </script>
 {% endblock %}
