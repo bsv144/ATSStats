@@ -119,7 +119,7 @@ def get_StatisticsByCall():
 	, con_Statistics)
 	con_Statistics.close()
 	df_Statistics = pd.DataFrame(sq_Statistics)
-	print(df_Statistics.to_json(orient='records'))
+	#print(df_Statistics.to_json(orient='records'))
 	json_out = df_Statistics.to_json(orient='records')
 	# result_groups = df_Statistics.groupby('ANumberDialed')
 	# #Создаём словарь с данными для дальнейшего вывода в формате json

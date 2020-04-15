@@ -100,16 +100,8 @@
       });
       html += `</tr> </thead>`;
       html += '</table>';
-      //console.log( html );
       $("#divStats").append(html);
-      //console.log( data );
-        //console.log( data.StatsGroups );
-        //j++;
       var tableRef = document.getElementById("tStats");
-      
-      //console.log( data[0]);
-      //console.log( typeof data[0]);
-      //console.log( Object.keys(data[0]).length);
       var aKeys = Object.keys(data[0]);
       for(var k= 1; k < aKeys.length; k++)
       {
@@ -121,8 +113,6 @@
         for(var j = 0; j < groupsCount; j++)
         {
           var newCell = newRow.insertCell(j+1);
-          console.log( data[j]);
-          console.log( key);
           var newText = document.createTextNode(data[j][key]);
           newCell.appendChild(newText);
         };
@@ -130,6 +120,7 @@
     };
 
     function getAJAXdata(){
+      console.log( '1' );
       $.post("/get_data", function( data ){
           //Обрабатываем группы
           $("#divGroups").empty();
@@ -144,15 +135,12 @@
         //console.log( JSON.parse(data));
         data = JSON.parse(data)
         groupsCount = data.length;
-        //Обрабатываем группы
         $("#divStats").empty();
         addStatistics( groupsCount, data );
-        //$.each( data.StatsGroups, function(i, groupsCount, group){
-        //  addStatistics( group );
-        //});
       }, "json");
     }
-    getAJAXdata()
-    setTimeout(getAJAXdata(), 30000)
+    //Запрашиваем данные каждые 30 секунд
+    getAJAXdata();
+    setInterval(function(){getAJAXdata()}, 30000);
   </script>
 {% endblock %}
