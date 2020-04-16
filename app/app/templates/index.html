@@ -1,4 +1,10 @@
 {% extends "bootstrap/base.html" %}
+
+{% block head %}
+{{super()}}
+<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+{% endblock %}
+
 {% block title %}Страница статистики АТС Infinity{% endblock %}
 
  
@@ -10,15 +16,17 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-2 container">
+      <div class="col">
         <h2><B>Группы</B></h2>
-        <div id="divGroups">
-         
-        </div>
       </div>
-      <div class="col-md-2"></div>
-      <div class="col-md-4"></div>
-      <div class="col-md-4"></div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div id="divGroups0"></div>
+      </div>
+      <div class="col">
+        <div id="divGroups1"></div>
+      </div>
     </div>
     <!-- End row -->
     <!-- Row for stat-->
@@ -34,7 +42,7 @@
     <!-- Row for stat-->
     <div class="row">
         <div class="col-md-12" >
-          <h2><B>Статистика</B></h2>
+          <h2><B>Статистика за текущий день</B></h2>
             <div id="divStats">
          
             </div>
@@ -50,7 +58,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <script type="text/javascript">
-    function addCallGroups( data ) 
+    function addCallGroups( i, data ) 
     {
       var j = 0;
       var html = '';
@@ -70,9 +78,10 @@
         //console.log( data );
         //console.log( data.groupname );
         $.each( JSON.parse(data.members), function(i, member ) {
-        //console.log( member.Login );
+        //console.log( member.IDUserState );
         j++;
-        html += `<tr>
+        var trColor = member.IDUserState != 300 ? 'class="table-warning"' : '';
+        html += `<tr ${trColor} >
           <th scope="row"> ${j} </td>
           <td> ${member.Name_F} </td>
           <td> ${member.Name_I} </td>
@@ -81,12 +90,12 @@
         </tr>`;
       });
       html += '</table>';
-      $("#divGroups").append(html);
+      $("#divGroups".concat(i)).replaceWith(html);
     };
 
     function addStatistics( groupsCount, data ) 
     {
-      var j = 0;
+      //var j = 0;
       var html = '';
       var html = `<table id="tStats" class="table border table-sm">
         <thead class="thead-light">
@@ -118,14 +127,48 @@
         };
       };
     };
-
-    function getAJAXdata(){
-      console.log( '1' );
+    
+    function addQueues( groupsCount, data ) 
+    {
+      //var j = 0;
+      var html = '';
+      var html = `<table id="tQueues" class="table border table-sm">
+        <thead class="thead-light">
+          <tr>
+          <th scope="col" rowspan="2"></th>
+          <th class="border" scope="col" colspan="${groupsCount}">Группа</th>
+          </tr>
+          <tr>`;
+      $.each( data, function(i,v) {    
+        html += `<th class="border" scope="col">${v.ANumberDialed}</th>`;
+      });
+      html += `</tr> </thead>`;
+      html += '</table>';
+      $("#divQueues").append(html);
+      var tableRef = document.getElementById("tQueues");
+      var aKeys = Object.keys(data[0]);
+      for(var k= 1; k < aKeys.length; k++)
+      {
+        var newRow = tableRef.insertRow(k+1);
+        var newCell = newRow.insertCell(0);
+        var key = aKeys[k];
+        var newText = document.createTextNode(key);
+        newCell.appendChild(newText);
+        for(var j = 0; j < groupsCount; j++)
+        {
+          var newCell = newRow.insertCell(j+1);
+          var newText = document.createTextNode(data[j][key]);
+          newCell.appendChild(newText);
+        };
+      };
+    };
+    function getAJAXdata()
+    {
       $.post("/get_data", function( data ){
           //Обрабатываем группы
           $("#divGroups").empty();
           $.each( data.CallGroups, function(i, group){
-            addCallGroups( group );
+            addCallGroups( i, group );
           });
           //console.log( typeof data );
         }, "json");
@@ -139,8 +182,23 @@
         addStatistics( groupsCount, data );
       }, "json");
     }
-    //Запрашиваем данные каждые 30 секунд
+    //Запрашиваем данные по статистике каждые 30 секунд
     getAJAXdata();
     setInterval(function(){getAJAXdata()}, 30000);
+
+    //Запрашиваем данные по текущей очереди каждые 5 секунд
+    function getAJAXdataQueues()
+    {
+      $.post("/get_queues", function( data ){
+        //console.log( typeof data);
+        //console.log( JSON.parse(data));
+        data = JSON.parse(data)
+        groupsCount = data.length;
+        $("#divQueues").empty();
+        addQueues( groupsCount, data );
+      }, "json");
+    };
+    getAJAXdataQueues();
+    setInterval(function(){getAJAXdataQueues()}, 5000);
   </script>
 {% endblock %}

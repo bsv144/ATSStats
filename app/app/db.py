@@ -20,7 +20,7 @@ PASSWORD = os.environ.get('PASSWORD')
 
 #Получаем пользователей групп
 def get_ACDQueuesMembers():
-	con_Configuration = psycopg2.connect( dbname= DBNAME, user= USER, password= PASSWORD, host= HOST, port= PORT)
+	con_Monitoring = psycopg2.connect( dbname= 'Cx_Monitoring', user= USER, password= PASSWORD, host= HOST, port= PORT)
 	con_Security = psycopg2.connect( dbname= 'Cx_Security', user= USER, password= PASSWORD, host= HOST, port= PORT)
 
 	sq_Users = pd.read_sql_query(
@@ -30,21 +30,33 @@ def get_ACDQueuesMembers():
 	, con_Security)
 	sq_ACDQueuesMembers = pd.read_sql_query(
 		'''
-		select qm."IDACDQueue", qm."IDMember",
-		case
-			when qm."IDACDQueue" in (5000049053,5014640991) then 'Колл-Центр (61-02-05)'
-			when qm."IDACDQueue" = 5014846675 then 'Приём показаний (61-05-25)'
-		end as "Name"
-		from public."C_ACDQueuesMembers" as qm
-		where qm."IDACDQueue" in (5000049053,5014846675,5014640991)
+		--IDUSerState - Статус номера
+		---300 - ОнЛайн
+		---302 - Отошёл
+		---301 - Перерыв
+		---399 - Не подключен
+
+		-- ExtensionState - Состояние номера
+		--- 1 - Свободен
+		--- 2 - Занят
+		select macq."IDUser", mua."ExtensionState", mua."IDUserState",
+			case
+				when macq."IDACD" in (5000049053,5014640991) then 'Колл-Центр (61-02-05)'
+				when macq."IDACD" = 5014846675 then 'Приём показаний (61-05-25)'
+			end as "Name"
+		from "M_ACDQueuesMembers" as macq
+		join "M_UsersStates" as mua on macq."IDUser" = mua."IDUser"
+		where macq."IDACD" in (5000049053,5014846675,5014640991)
+		and mua."IDUserState" != 399
+		order by macq."IDACD"
 		'''
-	, con_Configuration)
-	con_Configuration.close()
+	, con_Monitoring)
+	con_Monitoring.close()
 	con_Security.close()
 
 	df_Users = pd.DataFrame(sq_Users)
 	df_ACDQueuesMembers = pd.DataFrame(sq_ACDQueuesMembers)
-	result = pd.merge(df_ACDQueuesMembers, df_Users, how='left', left_on='IDMember', right_on='ID')
+	result = pd.merge(df_ACDQueuesMembers, df_Users, how='left', left_on='IDUser', right_on='ID')
 	#print( result )
 	result_groups = result.groupby('Name')
 	#Создаём словарь с данными для дальнейшего вывода в формате json
@@ -109,9 +121,14 @@ def get_StatisticsByCall():
 			case
 				when ss."ANumberDialed" = '79227810205' then 'Колл-Центр (61-02-05)'
 				when ss."ANumberDialed" = '79324080525' then 'Приём показаний (61-05-25)'
-			end as "ANumberDialed"
-		, "Общее кол-во звонков", "Обработано первым оператором", "Обработано в IVR",
-		"Обработано оператором", "Потеряно во  время ожидания", "Время ожидания", "Время разговора"
+			end as "ANumberDialed",
+			COALESCE("Общее кол-во звонков",0) as "Общее кол-во звонков", 
+			COALESCE("Обработано первым оператором",0) as "Обработано первым оператором",
+			COALESCE("Обработано в IVR",0) as "Обработано в IVR",
+			COALESCE("Обработано оператором",0) as "Обработано оператором", 
+			COALESCE("Потеряно во  время ожидания",0) as "Потеряно во  время ожидания",
+			COALESCE("Время ожидания",0) as "Время ожидания",
+			COALESCE("Время разговора",0) as "Время разговора"
 		from stats_seancescount as ss
 		left join stats_durationcalls as sd on ss."ANumberDialed" = sd."ANumberDialed"	
 		where ss."ANumberDialed" in ('79227810205', '79324080525')
@@ -129,3 +146,60 @@ def get_StatisticsByCall():
 	json_out = json.dumps(json_out)
 	# print(json_out)
 	return json_out
+
+#Получаем мониторинг по текущей очереди
+def get_QueuesByCall():
+	con_Monitoring = psycopg2.connect( dbname= 'Cx_Monitoring', user= USER, password= PASSWORD, host= HOST, port= PORT)
+	con_Monitoring.set_client_encoding('UTF8')
+	sq_Monitoring = pd.read_sql_query(
+		'''
+		WITH mAll as (
+			SELECT "ANumberDialed", count("ANumberDialed") as "Кол-во в очереди"
+			FROM public."M_Seances" as sen
+			WHERE sen."ANumberDialed" in ('79227810205','79324080525')
+				and "SeanceType" = 1
+				and "SeanceState" <> 100
+			GROUP BY "ANumberDialed"
+		), mOperator as (
+			SELECT "ANumberDialed", count("ANumberDialed") as "Очередь Оператор"
+			FROM public."M_Seances" as sen
+			WHERE sen."ANumberDialed" in ('79227810205','79324080525')
+				and "SeanceType" = 1
+				and "SeanceState" <> 100
+				and "IVRDTMF" is null
+			GROUP BY "ANumberDialed"
+		), mIvr as (
+			SELECT "ANumberDialed", count("ANumberDialed") as "Очередь IVR"
+			FROM public."M_Seances" as sen
+			WHERE sen."ANumberDialed" in ('79227810205','79324080525')
+				and "SeanceType" = 1
+				and "SeanceState" <> 100
+				and ("IVRDTMF" != '' or  "IVRDTMF" is not null)
+			GROUP BY "ANumberDialed"
+		)
+
+		select 	case
+				when ma."ANumberDialed" = '79227810205' then 'Колл-Центр (61-02-05)'
+				when ma."ANumberDialed" = '79324080525' then 'Приём показаний (61-05-25)'
+			end as "ANumberDialed",
+			COALESCE(ma."Кол-во в очереди",0) as "Кол-во в очереди",
+			COALESCE(mo."Очередь Оператор",0) as "Очередь Оператор",
+			COALESCE(mi."Очередь IVR",0) as "Очередь IVR"
+		from mAll as ma
+		left join mOperator as mo on ma."ANumberDialed" = mo."ANumberDialed"
+		left join mIvr as mi on ma."ANumberDialed" = mi."ANumberDialed"
+		'''
+	, con_Monitoring)
+	con_Monitoring.close()
+	df_Monitoring = pd.DataFrame(sq_Monitoring)
+	#print(df_Statistics.to_json(orient='records'))
+	json_out = df_Monitoring.to_json(orient='records')
+	# result_groups = df_Statistics.groupby('ANumberDialed')
+	# #Создаём словарь с данными для дальнейшего вывода в формате json
+	# json_out = {"StatsGroups" : []}
+	# for name, group in result_groups:
+	# 	json_out["StatsGroups"].append({"groupname" : name, "members" : group.to_json(orient='records')})
+	json_out = json.dumps(json_out)
+	# print(json_out)
+	return json_out
+

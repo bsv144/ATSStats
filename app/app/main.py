@@ -37,3 +37,7 @@ def getdata():
 @app.route('/get_stats', methods=['POST'])
 def getstats():
 	return db.get_StatisticsByCall()
+
+@app.route('/get_queues', methods=['POST'])
+def getqueues():
+	return db.get_QueuesByCall()
