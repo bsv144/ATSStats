@@ -81,7 +81,8 @@
         //console.log( member.IDUserState );
         j++;
         var trColor = member.IDUserState != 300 ? 'class="table-warning"' : '';
-        html += `<tr ${trColor} >
+        var vTitle  = member.IDUserState != 300 ? 'Отошёл' : (member.ExtensionState == 1 ? 'Свободен' : 'Разговор');
+        html += `<tr ${trColor} data-toggle="tooltip" title=${vTitle} >
           <th scope="row"> ${j} </td>
           <td> ${member.Name_F} </td>
           <td> ${member.Name_I} </td>
@@ -200,5 +201,9 @@
     };
     getAJAXdataQueues();
     setInterval(function(){getAJAXdataQueues()}, 5000);
+    //Инициализируем tooltip
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    })
   </script>
 {% endblock %}
