@@ -165,15 +165,6 @@
     };
     function getAJAXdata()
     {
-      $.post("/get_data", function( data ){
-          //Обрабатываем группы
-          $("#divGroups").empty();
-          $.each( data.CallGroups, function(i, group){
-            addCallGroups( i, group );
-          });
-          //console.log( typeof data );
-        }, "json");
-        
       $.post("/get_stats", function( data ){
         //console.log( typeof data);
         //console.log( JSON.parse(data));
@@ -190,6 +181,15 @@
     //Запрашиваем данные по текущей очереди каждые 5 секунд
     function getAJAXdataQueues()
     {
+      $.post("/get_data", function( data ){
+        //Обрабатываем группы
+        $("#divGroups").empty();
+        $.each( data.CallGroups, function(i, group){
+          addCallGroups( i, group );
+        });
+        //console.log( typeof data );
+      }, "json");
+      
       $.post("/get_queues", function( data ){
         //console.log( typeof data);
         //console.log( JSON.parse(data));
@@ -198,7 +198,9 @@
         $("#divQueues").empty();
         addQueues( groupsCount, data );
       }, "json");
+
     };
+
     getAJAXdataQueues();
     setInterval(function(){getAJAXdataQueues()}, 5000);
     //Инициализируем tooltip

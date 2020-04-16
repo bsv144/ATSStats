@@ -106,8 +106,8 @@ def get_StatisticsByCall():
 		), stats_durationcalls as (
 			--Среднее время обработки звонка
 			select "ANumberDialed",
-				avg("DurationWait") as "Время ожидания", 
-				avg("DurationTalk") as "Время разговора"
+				(to_timestamp(round(avg(coalesce(round("DurationWait"*24*60*60))))) at time zone 'UTC')::time as "Среднее время ожидания", 
+				(to_timestamp(round(avg(coalesce(round("DurationTalk"*24*60*60))))) at time zone 'UTC')::time as "Среднее время разговора"
 			from public."S_Seances"
 			WHERE "TimeStartDate" = '{odt}'
 				--Входящие звонки
@@ -127,8 +127,8 @@ def get_StatisticsByCall():
 			COALESCE("Обработано в IVR",0) as "Обработано в IVR",
 			COALESCE("Обработано оператором",0) as "Обработано оператором", 
 			COALESCE("Потеряно во  время ожидания",0) as "Потеряно во  время ожидания",
-			COALESCE("Время ожидания",0) as "Время ожидания",
-			COALESCE("Время разговора",0) as "Время разговора"
+			"Среднее время ожидания" as "Среднее время ожидания",
+			"Среднее время разговора" as "Среднее время разговора"
 		from stats_seancescount as ss
 		left join stats_durationcalls as sd on ss."ANumberDialed" = sd."ANumberDialed"	
 		where ss."ANumberDialed" in ('79227810205', '79324080525')
