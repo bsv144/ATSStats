@@ -75,7 +75,7 @@
           <th class="border" scope="col">Логин</th>
           </tr>
         </thead>`;
-        //console.log( data );
+        console.log( data );
         //console.log( data.groupname );
         $.each( JSON.parse(data.members), function(i, member ) {
         //console.log( member.IDUserState );
@@ -91,7 +91,8 @@
         </tr>`;
       });
       html += '</table>';
-      $("#divGroups".concat(i)).replaceWith(html);
+      $("#divGroups".concat(i)).empty();
+      $("#divGroups".concat(i)).append(html);
     };
 
     function addStatistics( groupsCount, data ) 
@@ -183,7 +184,6 @@
     {
       $.post("/get_data", function( data ){
         //Обрабатываем группы
-        $("#divGroups").empty();
         $.each( data.CallGroups, function(i, group){
           addCallGroups( i, group );
         });
