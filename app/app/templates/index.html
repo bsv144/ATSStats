@@ -2,7 +2,7 @@
 
 {% block head %}
 {{super()}}
-<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 {% endblock %}
 
 {% block title %}Страница статистики АТС Infinity{% endblock %}
@@ -80,7 +80,11 @@
         $.each( JSON.parse(data.members), function(i, member ) {
         //console.log( member.IDUserState );
         j++;
-        var trColor = member.IDUserState != 300 ? 'class="table-warning"' : '';
+	//В зависимости от статуса оператора, подкрашивает строчку
+	//красный   - оператор разговаривает
+	//зелёный   - оператор свободен
+	//оранжевый - оператор отошел
+        var trColor = member.IDUserState != 300 ? 'class="table-warning"' : (member.ExtensionState == 1 ? 'class="table-success"':'class="table-danger"');
         var vTitle  = member.IDUserState != 300 ? 'Отошёл' : (member.ExtensionState == 1 ? 'Свободен' : 'Разговор');
         html += `<tr ${trColor} data-toggle="tooltip" title=${vTitle} >
           <th scope="row"> ${j} </td>
